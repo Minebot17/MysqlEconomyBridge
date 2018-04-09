@@ -39,18 +39,16 @@ public class DatabaseManagerMysql implements DatabaseManagerInterface{
 	public boolean setupDatabase() {
 		try {
        	 	//Load Drivers
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             
-            dbHost = money.getConfigurationHandler().getString("database.mysql.host");
-            dbPort = money.getConfigurationHandler().getString("database.mysql.port");
-            database = money.getConfigurationHandler().getString("database.mysql.databaseName");
-            dbUser = money.getConfigurationHandler().getString("database.mysql.user");
-            dbPassword = money.getConfigurationHandler().getString("database.mysql.password");
+            dbHost = money.getConfigurationHandler().getString("database.mssql.host");
+            dbPort = money.getConfigurationHandler().getString("database.mssql.port");
+            database = money.getConfigurationHandler().getString("database.mssql.databaseName");
+            dbUser = money.getConfigurationHandler().getString("database.mssql.user");
+            dbPassword = money.getConfigurationHandler().getString("database.mssql.password");
             
             //Connect to database
-            conn = DriverManager.getConnection("jdbc:mysql://" + dbHost + ":"
-                + dbPort + "/" + database + "?" + "user=" + dbUser + "&"
-                + "password=" + dbPassword);
+			conn = DriverManager.getConnection("jdbc:sqlserver://"+dbHost+":"+dbPort+";databaseName="+database+";user="+dbUser+";password="+dbPassword+";");
            
           } catch (ClassNotFoundException e) {
             //System.out.println("Could not locate drivers!");
@@ -59,11 +57,12 @@ public class DatabaseManagerMysql implements DatabaseManagerInterface{
           } catch (SQLException e) {
             //System.out.println("Could not connect");
             Money.log.severe("Could not connect to mysql database!");
+            e.printStackTrace();
             return false;
           }
 		
 		//Create tables if needed
-	      Statement query;
+	      /*Statement query;
 	      try {
 	        query = conn.createStatement();
 	        
@@ -72,7 +71,7 @@ public class DatabaseManagerMysql implements DatabaseManagerInterface{
 	      } catch (SQLException e) {
 	        e.printStackTrace();
 	        return false;
-	      }
+	      }*/
       Money.log.info("Mysql has been set up!");
 		return true;
 	}

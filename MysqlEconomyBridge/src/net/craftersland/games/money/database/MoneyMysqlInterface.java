@@ -26,7 +26,7 @@ public class MoneyMysqlInterface implements AccountDatabaseInterface <Double>{
 	public boolean hasAccount(UUID player) {
 		      try {
 		 
-		        String sql = "SELECT `player_name` FROM `bc_accounts` WHERE `player_name` = ?";
+		        String sql = "select UUID from Users where UUID=?";
 		        PreparedStatement preparedUpdateStatement = conn.prepareStatement(sql);
 		        preparedUpdateStatement.setString(1, player.toString());
 		        
@@ -43,33 +43,14 @@ public class MoneyMysqlInterface implements AccountDatabaseInterface <Double>{
 	}
 	
 	@Override
-	public boolean createAccount(UUID player) {
-		try {
-			 
-	        String sql = "INSERT INTO `bc_accounts`(`player_name`, `balance`) " +
-	                     "VALUES(?, ?)";
-	        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-	        
-	        preparedStatement.setString(1, player.toString());
-	        preparedStatement.setString(2, "0");
-	        
-	        preparedStatement.executeUpdate();
-	        return true;
-	      } catch (SQLException e) {
-	        e.printStackTrace();
-	      }
-		return false;
-	}
-	
-	@Override
 	public Double getBalance(UUID player) {
 		if (!hasAccount(player)) {
-			createAccount(player);
+			return null;
 		}
 		
 	      try {
 	 
-	        String sql = "SELECT `balance` FROM `bc_accounts` WHERE `player_name` = ?";
+	        String sql = "select balance from Users where UUID=?";
 	        
 	        PreparedStatement preparedUpdateStatement = conn.prepareStatement(sql);
 	        preparedUpdateStatement.setString(1, player.toString());
@@ -87,15 +68,13 @@ public class MoneyMysqlInterface implements AccountDatabaseInterface <Double>{
 	@Override
 	public boolean setBalance(UUID player, Double amount) {
 		if (!hasAccount(player)) {
-			createAccount(player);
+			return false;
 		}
 		
         try {
-			String updateSql = "UPDATE `bc_accounts` " +
-			        "SET `balance` = ?" +
-			        "WHERE `player_name` = ?";
+			String updateSql = "update Users set balance=? where UUID=?";
 			PreparedStatement preparedUpdateStatement = conn.prepareStatement(updateSql);
-			preparedUpdateStatement.setString(1, amount+"");
+			preparedUpdateStatement.setInt(1, (int)(Math.floor(amount)));
 			preparedUpdateStatement.setString(2, player.toString());
 			
 			preparedUpdateStatement.executeUpdate();
@@ -109,7 +88,7 @@ public class MoneyMysqlInterface implements AccountDatabaseInterface <Double>{
 	@Override
 	public boolean addToAccount(UUID player, Double amount) {
 		if (!hasAccount(player)) {
-			createAccount(player);
+			return false;
 		}
 		
 		if (amount < 0) {
@@ -127,7 +106,7 @@ public class MoneyMysqlInterface implements AccountDatabaseInterface <Double>{
 	@Override
 	public boolean removeFromAccount(UUID player, Double amount) {
 		if (!hasAccount(player)) {
-			createAccount(player);
+			return false;
 		}
 		
 		if (amount < 0) {
@@ -149,12 +128,12 @@ public class MoneyMysqlInterface implements AccountDatabaseInterface <Double>{
 	      try {
 	        query = conn.createStatement();
 	 
-	        String sql = "SELECT `player_name` FROM `bc_accounts`";
+	        String sql = "select UUID from Users";
 	        ResultSet result = query.executeQuery(sql);
 	 
 	        List <UUID> loadingList= new ArrayList <UUID>();
 	        while (result.next()) {
-	        	loadingList.add(UUID.fromString(result.getString("player_name")));
+	        	loadingList.add(UUID.fromString(result.getString("UUID")));
 	        }
 	        return loadingList.toArray(new UUID [0]);
 	        

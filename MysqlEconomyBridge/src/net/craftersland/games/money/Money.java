@@ -11,6 +11,9 @@ import net.craftersland.games.money.database.DatabaseManagerMysql;
 import net.craftersland.games.money.database.MoneyMysqlInterface;
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,6 +67,18 @@ public final class Money extends JavaPlugin {
 	@Override
     public void onDisable() {
     	log.info("Money mysql has been disabled");
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        Player player = sender.getServer().getPlayer(sender.getName());
+        if (player == null)
+            return false;
+        if (command.getName().equals("economy"))
+            getMoneyDatabaseInterface().setBalance(player.getUniqueId(), Money.econ.getBalance(player));
+        else if (command.getName().equals("balance") || command.getName().equals("money"))
+            Money.econ.depositPlayer(player, getMoneyDatabaseInterface().getBalance(player.getUniqueId()));
+        return true;
     }
 	
 	//Methods for setting up Vault
