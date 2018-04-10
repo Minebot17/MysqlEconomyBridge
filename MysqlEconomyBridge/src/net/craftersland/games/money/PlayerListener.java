@@ -3,8 +3,11 @@ package net.craftersland.games.money;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -19,7 +22,37 @@ public class PlayerListener implements Listener{
 		this.money = money;
 		this.coHa = money.getConfigurationHandler();
 	}
-	
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void PlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent e){
+		String com = e.getMessage();
+		Player player = e.getPlayer();
+		String[] splitted = com.split(" ");
+		if (splitted[0].equals("money") || splitted[0].equals("balance")) {
+			Money.econ.withdrawPlayer(player, Money.econ.getBalance(player));
+			Money.econ.depositPlayer(player, money.getMoneyDatabaseInterface().getBalance(player.getUniqueId()));
+		}
+		else if (splitted[0].equals("economy") || splitted[0].equals("eco")){
+			int toDB = (int)Money.econ.getBalance(player);
+			int value = Integer.parseInt(splitted[3]);
+			switch (splitted[1]){
+				case "set":
+					toDB = value;
+					break;
+				case "give":
+					toDB += value;
+					break;
+				case "take":
+					toDB -= value;
+					break;
+				case "reset":
+					toDB = 0;
+					break;
+			}
+			money.getMoneyDatabaseInterface().setBalance(player.getUniqueId(), (double)toDB);
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onLogin(final PlayerJoinEvent event) {
